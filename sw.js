@@ -1,6 +1,6 @@
-const V="ss-v1";
-self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(["./","index.html","manifest.json","icon-192.png"])));self.skipWaiting()});
-self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
+const V="ss-v2";
+self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(["./","index.html","manifest.json","icon-192.png"].map(u=>c.add(u).catch(()=>0)))));self.skipWaiting()});
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x.startsWith("ss-")&&x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{const r=e.request,u=new URL(r.url);
  if(r.method==="POST"&&u.pathname.endsWith("/share")){e.respondWith((async()=>{const f=await r.formData(),c=await caches.open("share");
   const t=[f.get("title"),f.get("text"),f.get("url")].filter(Boolean).join("\n");await c.put("t",new Response(t));
