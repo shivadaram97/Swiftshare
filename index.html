@@ -7,7 +7,7 @@
 @media(prefers-color-scheme:dark){:root{--bg:#0d1415;--cd:#162022;--tx:#e6efee;--mu:#8fa5a3;--ac:#2dd4bf;--on:#062a27;--bd:#253436;--dg:#f97066}}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:76px}
-main{max-width:720px;margin:0 auto;padding:12px}
+main{max-width:960px;margin:0 auto;padding:12px}
 h1{font-size:20px;margin:0}header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;max-width:720px;margin:0 auto}
 .card{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
 textarea,input,select{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px}
@@ -23,7 +23,9 @@ nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--cd);bor
 nav button{flex:1;border:0;border-radius:0;padding:16px 0;background:none;color:var(--mu);font-weight:600}
 nav button.on{color:var(--ac);box-shadow:inset 0 3px var(--ac)}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}.chips button{white-space:nowrap}.chips .on{background:var(--ac);color:var(--on)}
-#login{padding:16px 0}.hide{display:none!important}
+#login{padding:16px 0}
+#pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pc{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:8px}.pc.w{grid-column:1/3}
+.pt{min-height:36vh}.pc.w .pt{min-height:20vh}.pn{font-weight:600;margin-bottom:6px;padding:6px 8px}#pg.st{grid-template-columns:1fr}#pg.st .pc.w{grid-column:auto}.hide{display:none!important}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.s{opacity:1}dialog{border:1px solid var(--bd);border-radius:12px;background:var(--cd);color:var(--tx);width:min(92vw,380px)}
 </style></head><body>
@@ -40,8 +42,7 @@ nav button.on{color:var(--ac);box-shadow:inset 0 3px var(--ac)}
  <div class="card"><textarea id="ci" placeholder="Type or paste text to send to your other device"></textarea>
  <div class="row"><button class="p" id="send">Send</button><button id="pst">Paste and send</button><label class="g"><button style="width:100%" onclick="this.nextElementSibling.click()">Add file</button><input type="file" id="cf" multiple class="hide"></label></div></div>
  <div id="cl"></div></section>
-<section id="t-pad" class="hide"><div class="card"><textarea id="pd" style="min-height:55vh" placeholder="Draft or correct your report here. It saves automatically and syncs live."></textarea>
- <div class="row"><button class="p" id="pc">Copy all</button><button id="px" class="d">Clear</button><button id="pl">Add quick pad</button><span class="meta g" id="ps"></span></div></div></section>
+<section id="t-pad" class="hide"><div class="row" style="margin:0 0 8px"><button class="p" id="sy">Sync now</button><span class="meta g" id="ps">…</span><button id="lt">Layout</button><button id="pl">Add quick pad</button></div><div id="pg"><div class="pc"><input class="pn" id="la" value="Pad 1" aria-label="Pad title"><textarea id="a" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="a">Copy</button><button class="d" data-cl="a">Clear</button></div></div><div class="pc"><input class="pn" id="lb" value="Pad 2" aria-label="Pad title"><textarea id="b" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="b">Copy</button><button class="d" data-cl="b">Clear</button></div></div><div class="pc w"><input class="pn" id="li" value="Impression" aria-label="Pad title"><textarea id="i" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="i">Copy</button><button class="d" data-cl="i">Clear</button></div></div></div></section>
 <section id="t-vault" class="hide"><div class="card"><div class="row" style="margin:0"><select id="vt" class="g"><option>Signature</option><option>Photo</option><option>Certificate</option><option>ID</option><option>Other</option></select>
  <button class="p" onclick="vf.click()">Upload to vault</button><input type="file" id="vf" multiple class="hide"></div>
  <div class="meta">Images are compressed to under 700 KB. PDFs and other files can be up to 6 MB.</div></div>
@@ -62,9 +63,9 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signInWithEmailAndPassword,sendPasswordResetEmail,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot,getDocs,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot,getDocs,getDocFromServer,waitForPendingWrites,disableNetwork,enableNetwork,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCycW4ktbTN5MBSGekAXvHcq6eh91IhmP8",authDomain:"swiftshare-c4006.firebaseapp.com",projectId:"swiftshare-c4006",storageBucket:"swiftshare-c4006.firebasestorage.app",messagingSenderId:"1029761340395",appId:"1:1029761340395:web:3397c80f3b9b3859acbfae"});
-const auth=getAuth(app),db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+const auth=getAuth(app),db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true,localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const $=s=>document.querySelector(s),MAX=700*1024,BIG=6*1048576,CH=800000;let uid,tag="All",vault=[],zi=null;
 const col=n=>collection(db,"users",uid,n),toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("s");setTimeout(()=>t.classList.remove("s"),1800)};
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -74,7 +75,7 @@ $("#out").onclick=()=>signOut(auth);
 const em=m=>$("#lerr").textContent=m;
 $("#ei").onclick=async()=>{try{await signInWithEmailAndPassword(auth,$("#le").value.trim(),$("#lp").value)}catch{em("Sign-in failed. Check your email and password, or use Set or reset password.")}};
 $("#lr").onclick=async()=>{const m=$("#le").value.trim();if(!m)return em("Enter your email first.");try{await sendPasswordResetEmail(auth,m);em("Check your email for a link to set your password.")}catch{em("Could not send the email. Check the address.")}};
-$("#pl").onclick=()=>{const t=localStorage.getItem("ss-local-pad");if(!t)return toast("Quick pad is empty");const p=$("#pd");p.value=(p.value?p.value+"\n\n":"")+t;p.oninput();localStorage.removeItem("ss-local-pad");toast("Quick pad added")};
+$("#pl").onclick=()=>{const t=localStorage.getItem("ss-local-pad");if(!t)return toast("Quick pad is empty");const p=$("#a");p.value=(p.value?p.value+"\n\n":"")+t;p.oninput();localStorage.removeItem("ss-local-pad");toast("Quick pad added")};
 onAuthStateChanged(auth,u=>{$("#login").classList.toggle("hide",!!u);$("#app").classList.toggle("hide",!u);if(u&&u.uid!==uid){uid=u.uid;start()}});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x==b));["clip","pad","vault"].forEach(t=>$("#t-"+t).classList.toggle("hide",t!=b.dataset.t))});
 const copy=async t=>{try{await navigator.clipboard.writeText(t);toast("Copied")}catch{toast("Copy blocked. Tap in the box and copy manually.")}};
@@ -107,10 +108,20 @@ $("#zg").onclick=async()=>{const k=+$("#zk").value,p=+$("#zp").value;if(!k||!p)r
 function start(){
  onSnapshot(query(col("clips"),orderBy("ts","desc"),limit(50)),s=>{store.clips=s.docs.map(x=>({id:x.id,...x.data()}));$("#cl").innerHTML=store.clips.map(d=>card(d,"clips",d.id)).join("")||'<p class="meta">Nothing here yet. Send text or a file from this device and it appears on your other one.</p>'});
  onSnapshot(query(col("vault"),orderBy("ts","desc")),s=>{store.vault=s.docs.map(x=>({id:x.id,...x.data()}));drawV()});
- const pr=doc(db,"users",uid,"pad","main");onSnapshot(pr,s=>{const t=s.data()?.text??"";if(document.activeElement!==$("#pd")&&$("#pd").value!==t)$("#pd").value=t;$("#ps").textContent=s.metadata.hasPendingWrites?"Saving…":"Saved"});
- let tm;$("#pd").oninput=()=>{$("#ps").textContent="Typing…";clearTimeout(tm);tm=setTimeout(()=>setDoc(pr,{text:$("#pd").value,ts:serverTimestamp()}),600)};
- $("#pc").onclick=()=>copy($("#pd").value);$("#px").onclick=()=>{if(confirm("Clear the pad on all devices?")){$("#pd").value="";setDoc(pr,{text:"",ts:serverTimestamp()})}};
- shared()}
+ const F=["a","b","i"],L={a:"la",b:"lb",i:"li"},pr=doc(db,"users",uid,"pad","main"),dirty={},tm={},fld=k=>$("#"+k),ps=t=>$("#ps").textContent=t;
+const put=(k,v)=>setDoc(pr,{[k]:v,ts:serverTimestamp()},{merge:true});
+const flush=()=>{for(const k in dirty){clearTimeout(tm[k]);const v=dirty[k];delete dirty[k];put(k,v)}};
+const apply=(d,force)=>F.forEach(k=>{const v=d[k]??(k=="a"?d.text:"")??"";if(!(k in dirty)&&(force||document.activeElement!==fld(k))&&fld(k).value!==v)fld(k).value=v;const l=d[L[k]];if(l&&!(L[k] in dirty)&&document.activeElement!==fld(L[k]))fld(L[k]).value=l});
+const st=s=>ps(!navigator.onLine?"Offline. Saved on this device":s.metadata.hasPendingWrites?"Saving…":s.metadata.fromCache?"Waiting for server…":"Synced");
+onSnapshot(pr,{includeMetadataChanges:true},s=>{apply(s.data()||{});st(s)});
+F.flatMap(k=>[k,L[k]]).forEach(k=>{fld(k).oninput=()=>{dirty[k]=fld(k).value;ps("Typing…");clearTimeout(tm[k]);tm[k]=setTimeout(()=>{const v=dirty[k];delete dirty[k];put(k,v)},250)};fld(k).onblur=flush});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flush()});addEventListener("pagehide",flush);
+document.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>copy(fld(b.dataset.cp).value));
+document.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const k=b.dataset.cl;if(fld(k).value&&!confirm("Clear this pad on all devices?"))return;fld(k).value="";delete dirty[k];put(k,"")});
+$("#sy").onclick=async()=>{ps("Syncing…");flush();try{await disableNetwork(db);await enableNetwork(db);await Promise.race([waitForPendingWrites(db),new Promise((_,j)=>setTimeout(j,10000))]);apply((await getDocFromServer(pr)).data()||{},true);ps("Synced");toast("Synced")}catch{ps("Sync failed. Check internet, then tap Sync now");toast("Sync failed")}};
+addEventListener("online",()=>$("#sy").click());addEventListener("offline",()=>ps("Offline. Saved on this device"));
+const ly=()=>$("#pg").classList.toggle("st",localStorage.getItem("ss-lay")=="st");ly();$("#lt").onclick=()=>{localStorage.setItem("ss-lay",localStorage.getItem("ss-lay")=="st"?"sb":"st");ly()};
+shared()}
 const sendT=async t=>{t=t.trim();if(!t)return;await addDoc(col("clips"),{kind:"text",text:t,ts:serverTimestamp()});toast("Sent")};
 $("#send").onclick=async()=>{await sendT($("#ci").value);$("#ci").value=""};
 $("#pst").onclick=async()=>{try{await sendT(await navigator.clipboard.readText())}catch{toast("Allow clipboard access, or paste into the box")}};
