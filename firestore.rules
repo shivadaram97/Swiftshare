@@ -1,11 +1,29 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null
+
+    function owner(uid) {
+      return request.auth != null
         && request.auth.uid == uid
         && request.auth.token.email == "shivadaram97@gmail.com"
         && request.auth.token.email_verified == true;
+    }
+
+    // A login is valid only if it started after the last "Sign out everywhere".
+    function fresh(uid) {
+      let p = /databases/$(database)/documents/security/$(uid);
+      return !exists(p) || request.auth.token.auth_time >= get(p).data.t.toMillis() / 1000;
+    }
+
+    match /users/{uid}/{document=**} {
+      allow read, write: if owner(uid) && fresh(uid);
+    }
+
+    match /security/{uid} {
+      allow read: if owner(uid);
+      allow write: if owner(uid) && fresh(uid)
+        && request.resource.data.keys().hasOnly(['t'])
+        && request.resource.data.t == request.time;
     }
   }
 }

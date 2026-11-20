@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><script>document.documentElement.className=localStorage.getItem("ss-in")=="1"?"in":""</script><link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"><link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"><link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e"><link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png"><title>Swiftshare</title>
@@ -23,7 +23,7 @@ nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--cd);bor
 nav button{flex:1;border:0;border-radius:0;padding:16px 0;background:none;color:var(--mu);font-weight:600}
 nav button.on{color:var(--ac);box-shadow:inset 0 3px var(--ac)}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}.chips button{white-space:nowrap}.chips .on{background:var(--ac);color:var(--on)}
-#login{padding:16px 0}
+#login{padding:16px 0}#app{display:none}html.in #app{display:block}html.in #login{display:none}header{gap:8px}header #ps{flex:1;text-align:right;font-size:12px}
 #pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pc{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:8px}.pc.w{grid-column:1/3}
 .pt{min-height:36vh}.pc.w .pt{min-height:20vh}.pn{font-weight:600;margin-bottom:6px;padding:6px 8px}#pg.st{grid-template-columns:1fr}#pg.st .pc.w{grid-column:auto}.hide{display:none!important}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none}
@@ -35,24 +35,25 @@ nav button.on{color:var(--ac);box-shadow:inset 0 3px var(--ac)}
 <div class="row"><button id="lr">Set or reset password</button><button class="inst hide">Install app</button></div><div class="meta" id="lerr"></div></div>
 <div class="card"><b>Quick pad</b><div class="meta">Works without signing in. Saved on this device only.</div>
 <textarea id="lpad" style="min-height:28vh;margin-top:8px" placeholder="Type notes here before you sign in"></textarea><div class="row"><button id="lcopy">Copy</button></div></div></main></div>
-<div id="app" class="hide">
-<header><h1>Swiftshare</h1><span><button class="inst hide">Install</button> <button id="out">Sign out</button></span></header>
+<div id="app">
+<header><h1>Swiftshare</h1><span class="meta" id="ps"></span><span><button class="inst hide">Install</button> <button class="p" id="sy">Sync</button></span></header>
 <main>
 <section id="t-clip">
  <div class="card"><textarea id="ci" placeholder="Type or paste text to send to your other device"></textarea>
  <div class="row"><button class="p" id="send">Send</button><button id="pst">Paste and send</button><label class="g"><button style="width:100%" onclick="this.nextElementSibling.click()">Add file</button><input type="file" id="cf" multiple class="hide"></label></div></div>
  <div id="cl"></div></section>
-<section id="t-pad" class="hide"><div class="row" style="margin:0 0 8px"><button class="p" id="sy">Sync now</button><span class="meta g" id="ps">…</span><button id="lt">Layout</button><button id="pl">Add quick pad</button></div><div id="pg"><div class="pc"><input class="pn" id="la" value="Pad 1" aria-label="Pad title"><textarea id="a" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="a">Copy</button><button class="d" data-cl="a">Clear</button></div></div><div class="pc"><input class="pn" id="lb" value="Pad 2" aria-label="Pad title"><textarea id="b" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="b">Copy</button><button class="d" data-cl="b">Clear</button></div></div><div class="pc w"><input class="pn" id="li" value="Impression" aria-label="Pad title"><textarea id="i" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="i">Copy</button><button class="d" data-cl="i">Clear</button></div></div></div></section>
+<section id="t-pad" class="hide"><div class="row" style="margin:0 0 8px"><button class="p" id="nc">New case</button><button id="hs">History</button><button id="lt">Layout</button><button id="pl">Add quick pad</button></div><div id="pg"><div class="pc"><input class="pn" id="la" value="Pad 1" aria-label="Pad title"><textarea id="a" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="a">Copy</button><button class="d" data-cl="a">Clear</button></div></div><div class="pc"><input class="pn" id="lb" value="Pad 2" aria-label="Pad title"><textarea id="b" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="b">Copy</button><button class="d" data-cl="b">Clear</button></div></div><div class="pc w"><input class="pn" id="li" value="Impression" aria-label="Pad title"><textarea id="i" class="pt" placeholder="Type here"></textarea><div class="row"><button class="p g" data-cp="i">Copy</button><button class="d" data-cl="i">Clear</button></div></div></div></section>
 <section id="t-vault" class="hide"><div class="card"><div class="row" style="margin:0"><select id="vt" class="g"><option>Signature</option><option>Photo</option><option>Certificate</option><option>ID</option><option>Other</option></select>
  <button class="p" onclick="vf.click()">Upload to vault</button><input type="file" id="vf" multiple class="hide"></div>
  <div class="meta">Images are compressed to under 700 KB. PDFs and other files can be up to 6 MB.</div></div>
  <div class="chips" id="vc"></div><div id="vl"></div></section>
-</main>
-<nav><button data-t="clip" class="on">Clipboard</button><button data-t="pad">Pad</button><button data-t="vault">Vault</button></nav></div>
+<section id="t-dev" class="hide"><div class="card"><b>Signed-in devices</b><div class="meta">Devices that opened Swiftshare with your account.</div></div><div id="dl"></div>
+<div class="card"><div class="row" style="margin:0"><button id="out">Sign out this device</button><button class="d" id="so">Sign out everywhere</button></div><div class="meta">Sign out everywhere locks out every other device within seconds, even a copied login. You will need to sign in again here.</div></div></section></main>
+<nav><button data-t="clip" class="on">Clipboard</button><button data-t="pad">Pad</button><button data-t="vault">Vault</button><button data-t="dev">Devices</button></nav></div>
 <dialog id="dz"><b>Resize image for upload</b><div class="row"><button data-k="50" data-p="300">Signature 50 KB</button><button data-k="200" data-p="600">Photo 200 KB</button><button data-k="300" data-p="1200">Certificate 300 KB</button></div>
 <div class="row"><input id="zk" type="number" placeholder="Max KB" style="width:46%"><input id="zp" type="number" placeholder="Max px" style="width:46%"></div>
 <div class="row"><button class="p" id="zg">Download resized</button><button id="zc">Cancel</button></div></dialog>
-<div id="toast"></div>
+<dialog id="dh"><b>Case history</b><div id="hl" style="max-height:60vh;overflow:auto;margin-top:8px"></div><div class="row"><button id="hc">Close</button></div></dialog><div id="toast"></div>
 <script>
 const lp=document.getElementById("lpad"),K="ss-local-pad";lp.value=localStorage.getItem(K)||"";lp.oninput=()=>localStorage.setItem(K,lp.value);
 document.getElementById("lcopy").onclick=()=>navigator.clipboard.writeText(lp.value);
@@ -63,7 +64,7 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signInWithEmailAndPassword,sendPasswordResetEmail,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot,getDocs,getDocFromServer,waitForPendingWrites,disableNetwork,enableNetwork,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot as _os,getDocs,getDocFromServer,waitForPendingWrites,disableNetwork,enableNetwork,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCycW4ktbTN5MBSGekAXvHcq6eh91IhmP8",authDomain:"swiftshare-c4006.firebaseapp.com",projectId:"swiftshare-c4006",storageBucket:"swiftshare-c4006.firebasestorage.app",messagingSenderId:"1029761340395",appId:"1:1029761340395:web:3397c80f3b9b3859acbfae"});
 const auth=getAuth(app),db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true,localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const $=s=>document.querySelector(s),MAX=700*1024,BIG=6*1048576,CH=800000;let uid,tag="All",vault=[],zi=null;
@@ -71,13 +72,16 @@ const col=n=>collection(db,"users",uid,n),toast=m=>{const t=$("#toast");t.textCo
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const kb=n=>n>1024*1024?(n/1048576).toFixed(1)+" MB":Math.round(n/1024)+" KB";
 $("#go").onclick=async()=>{const p=new GoogleAuthProvider();try{await signInWithPopup(auth,p)}catch(e){signInWithRedirect(auth,p)}};
-$("#out").onclick=()=>signOut(auth);
-const em=m=>$("#lerr").textContent=m;
+let kk=0;async function kicked(m){if(kk++)return;localStorage.setItem("ss-in","0");sessionStorage.setItem("ss-msg",m||"You were signed out on this device.");try{await signOut(auth)}catch{}location.reload()}
+function er(e){if(e.code=="permission-denied")kicked()}
+const onSnapshot=(r,...a)=>_os(r,...a,er);
+$("#out").onclick=()=>kicked("Signed out.");
+const em=m=>$("#lerr").textContent=m;{const m=sessionStorage.getItem("ss-msg");if(m){em(m);sessionStorage.removeItem("ss-msg")}}
 $("#ei").onclick=async()=>{try{await signInWithEmailAndPassword(auth,$("#le").value.trim(),$("#lp").value)}catch{em("Sign-in failed. Check your email and password, or use Set or reset password.")}};
 $("#lr").onclick=async()=>{const m=$("#le").value.trim();if(!m)return em("Enter your email first.");try{await sendPasswordResetEmail(auth,m);em("Check your email for a link to set your password.")}catch{em("Could not send the email. Check the address.")}};
 $("#pl").onclick=()=>{const t=localStorage.getItem("ss-local-pad");if(!t)return toast("Quick pad is empty");const p=$("#a");p.value=(p.value?p.value+"\n\n":"")+t;p.oninput();localStorage.removeItem("ss-local-pad");toast("Quick pad added")};
-onAuthStateChanged(auth,u=>{$("#login").classList.toggle("hide",!!u);$("#app").classList.toggle("hide",!u);if(u&&u.uid!==uid){uid=u.uid;start()}});
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x==b));["clip","pad","vault"].forEach(t=>$("#t-"+t).classList.toggle("hide",t!=b.dataset.t))});
+onAuthStateChanged(auth,u=>{document.documentElement.classList.toggle("in",!!u);localStorage.setItem("ss-in",u?"1":"0");if(u&&u.uid!==uid){uid=u.uid;start()}});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x==b));["clip","pad","vault","dev"].forEach(t=>$("#t-"+t).classList.toggle("hide",t!=b.dataset.t))});
 const copy=async t=>{try{await navigator.clipboard.writeText(t);toast("Copied")}catch{toast("Copy blocked. Tap in the box and copy manually.")}};
 const rd=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
 async function shrink(file,maxKB,maxPx){const bm=await createImageBitmap(file);let s=Math.min(1,maxPx/Math.max(bm.width,bm.height)),q=.92,b;
@@ -121,6 +125,27 @@ document.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const k=b.datas
 $("#sy").onclick=async()=>{ps("Syncing…");flush();try{await disableNetwork(db);await enableNetwork(db);await Promise.race([waitForPendingWrites(db),new Promise((_,j)=>setTimeout(j,10000))]);apply((await getDocFromServer(pr)).data()||{},true);ps("Synced");toast("Synced")}catch{ps("Sync failed. Check internet, then tap Sync now");toast("Sync failed")}};
 addEventListener("online",()=>$("#sy").click());addEventListener("offline",()=>ps("Offline. Saved on this device"));
 const ly=()=>$("#pg").classList.toggle("st",localStorage.getItem("ss-lay")=="st");ly();$("#lt").onclick=()=>{localStorage.setItem("ss-lay",localStorage.getItem("ss-lay")=="st"?"sb":"st");ly()};
+const did=localStorage.getItem("ss-dev")||(()=>{const v=crypto.randomUUID();localStorage.setItem("ss-dev",v);return v})(),dr=doc(db,"users",uid,"devices",did);
+const dn=()=>{const u=navigator.userAgent,o=/Android/.test(u)?"Android":/iPhone|iPad/.test(u)?"iOS":/Windows/.test(u)?"Windows":/Mac/.test(u)?"Mac":/Linux/.test(u)?"Linux":"Device",b=/Edg\//.test(u)?"Edge":/Chrome\//.test(u)?"Chrome":/Firefox\//.test(u)?"Firefox":/Safari\//.test(u)?"Safari":"Browser";return b+" on "+o+(matchMedia("(display-mode: standalone)").matches?" (app)":"")};
+const ago=t=>{if(!t)return"just now";const m=(Date.now()-t.toMillis())/6e4;return m<1?"just now":m<60?Math.round(m)+" min ago":m<1440?Math.round(m/60)+" h ago":Math.round(m/1440)+" d ago"};
+const beat=()=>setDoc(dr,{name:dn(),seen:serverTimestamp()},{merge:true});setDoc(dr,{name:dn(),removed:false,seen:serverTimestamp()},{merge:true});
+setInterval(()=>{if(!document.hidden)beat()},12e4);document.addEventListener("visibilitychange",()=>{if(!document.hidden)beat()});
+onSnapshot(dr,s=>{if(s.data()?.removed)kicked("This device was signed out from another device.")});
+onSnapshot(query(col("devices"),orderBy("seen","desc")),s=>{$("#dl").innerHTML=s.docs.filter(x=>!x.data().removed).map(x=>{const d=x.data();return`<div class="card"><b>${esc(d.name||"Device")}</b>${x.id==did?" (this device)":""}<div class="meta">Active ${ago(d.seen)}</div>${x.id==did?"":`<div class="row"><button class="d" data-rm="${x.id}">Sign out</button></div>`}</div>`}).join("")});
+$("#dl").onclick=e=>{const id=e.target.dataset.rm;if(id&&confirm("Sign out that device?"))setDoc(doc(db,"users",uid,"devices",id),{removed:true},{merge:true})};
+let at=0,mt=0;const chk=()=>{if(at&&mt&&at<mt)kicked("Signed out everywhere for security.")};
+auth.currentUser.getIdTokenResult().then(r=>{at=+r.claims.auth_time;chk()});
+_os(doc(db,"security",uid),s=>{mt=s.data()?.t?.seconds||0;chk()},()=>{});
+$("#so").onclick=async()=>{if(!confirm("Sign out every device, including this one?"))return;try{await Promise.race([setDoc(doc(db,"security",uid),{t:serverTimestamp()}),new Promise((_,j)=>setTimeout(j,8000))]);kicked("Signed out everywhere. Sign in again to continue.")}catch{toast("Failed. Check internet and that the new rules are published.")}};
+let cases=[];const cs=()=>F.some(k=>fld(k).value.trim()),snp=()=>({a:fld("a").value,b:fld("b").value,i:fld("i").value,la:fld("la").value,lb:fld("lb").value,li:fld("li").value});
+const trim=async()=>{(await getDocs(query(col("cases"),orderBy("ts","desc")))).docs.slice(20).forEach(d=>deleteDoc(d.ref))};
+const keep=()=>addDoc(col("cases"),{...snp(),ts:serverTimestamp()}).then(trim,()=>{});
+$("#nc").onclick=()=>{if(!cs())return toast("Pads are already empty");if(!confirm("Save these pads to history and start a new case?"))return;flush();keep();F.forEach(k=>{fld(k).value="";delete dirty[k];put(k,"")});toast("New case")};
+$("#hs").onclick=()=>$("#dh").showModal();$("#hc").onclick=()=>$("#dh").close();
+onSnapshot(query(col("cases"),orderBy("ts","desc"),limit(20)),s=>{cases=s.docs.map(x=>({id:x.id,...x.data()}));$("#hl").innerHTML=cases.map(c=>`<div class="card"><div class="meta">${c.ts?c.ts.toDate().toLocaleString():"now"}</div>${["a","b","i"].map(k=>c[k]?`<div class="txt" style="max-height:3.4em"><b>${esc(c["l"+k]||"")}:</b> ${esc(c[k].slice(0,90))}</div>`:"").join("")}<div class="row"><button class="p" data-rs="${c.id}">Restore</button><button class="d" data-dh="${c.id}">Delete</button></div></div>`).join("")||'<p class="meta">No saved cases yet.</p>'});
+$("#hl").onclick=e=>{const r=e.target.dataset.rs,d=e.target.dataset.dh;if(d&&confirm("Delete this case?"))deleteDoc(doc(db,"users",uid,"cases",d));
+ if(r){const c=cases.find(x=>x.id==r);if(cs()&&!confirm("Replace the current pads? They will be saved to history first."))return;if(cs())keep();
+ F.forEach(k=>{fld(k).value=c[k]||"";delete dirty[k];put(k,c[k]||"")});F.forEach(k=>{if(c[L[k]]){fld(L[k]).value=c[L[k]];put(L[k],c[L[k]])}});$("#dh").close();toast("Restored")}};
 shared()}
 const sendT=async t=>{t=t.trim();if(!t)return;await addDoc(col("clips"),{kind:"text",text:t,ts:serverTimestamp()});toast("Sent")};
 $("#send").onclick=async()=>{await sendT($("#ci").value);$("#ci").value=""};
