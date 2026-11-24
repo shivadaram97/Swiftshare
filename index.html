@@ -61,8 +61,10 @@ body.split main{max-width:1600px;display:grid;grid-template-columns:1fr 1.5fr 1f
 <div class="card"><b>Dictation (Groq)</b><div class="meta" id="gc"></div>
 <textarea id="gk" class="keys" placeholder="Groq API keys, one per line" style="min-height:70px;margin-top:8px"></textarea>
 <select id="gm" style="margin-top:8px"><option value="whisper-large-v3">whisper-large-v3 (most accurate)</option><option value="whisper-large-v3-turbo">whisper-large-v3-turbo (fastest)</option></select>
-<div class="meta" style="margin:8px 0 4px">Medical dictionary: one term per line, or "heard = correct". Lines starting with # are ignored.</div>
-<textarea id="gd" style="min-height:140px" placeholder="hepatosplenomegaly&#10;bye rads = BI-RADS&#10;chole lithiasis = cholelithiasis"></textarea>
+<label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="gcl" style="width:auto"> Clean up with AI after dictation (fillers, full stops, capitals, new lines)</label>
+<select id="gcm" style="margin-top:8px"><option value="openai/gpt-oss-120b">Cleanup model: gpt-oss-120b (best)</option><option value="llama-3.3-70b-versatile">Cleanup model: llama-3.3-70b (fast)</option><option value="openai/gpt-oss-20b">Cleanup model: gpt-oss-20b (fastest)</option></select>
+<div class="meta" style="margin:10px 0 4px"><b>Medical dictionary.</b> Two kinds of line:<br>1) A correct term alone, e.g. <code>IUGR</code>, so the model listens for it.<br>2) A fix for a repeated mistake: what it wrote = what you meant, e.g. <code>iejr = IUGR</code>.<br>Lines starting with # are ignored.</div>
+<textarea id="gd" style="min-height:140px" placeholder="IUGR&#10;iejr = IUGR&#10;bye rads = BI-RADS&#10;hepatosplenomegaly"></textarea>
 <div class="row"><button class="p" id="gs">Save settings</button></div></div>
 <div class="card"><b>Signed-in devices</b><div class="meta">Devices that opened Swiftshare with your account.</div></div><div id="dl"></div>
 <div class="card"><b>Security</b><div class="row"><button id="out2">Sign out this device</button><button class="d" id="so">Sign out everywhere</button></div><div class="meta" style="margin-top:6px">Sign out everywhere locks out every other device within seconds, even a copied login. You will need to sign in again here.</div></div></section></main>
@@ -141,7 +143,7 @@ $("#zg").onclick=async()=>{const k=+$("#zk").value,p=+$("#zp").value;if(!k||!p)r
 function start(){
  onSnapshot(query(col("clips"),orderBy("ts","desc"),limit(50)),s=>{store.clips=s.docs.map(x=>({id:x.id,...x.data()}));$("#cl").innerHTML=store.clips.map(d=>card(d,"clips",d.id)).join("")||'<p class="meta">Nothing here yet. Send text or a file from this device and it appears on your other one.</p>'});
  onSnapshot(query(col("vault"),orderBy("ts","desc")),s=>{store.vault=s.docs.map(x=>({id:x.id,...x.data()}));drawV()});
- const pc=()=>col("pads"),dirty={},tm={},cfg={keys:[],dict:"",model:"whisper-large-v3"},ps=t=>$("#ps").textContent=t;let pads=[],ens=0;
+ const pc=()=>col("pads"),dirty={},tm={},cfg={keys:[],dict:"",model:"whisper-large-v3",clean:true,cm:"openai/gpt-oss-120b"},ps=t=>$("#ps").textContent=t;let pads=[],ens=0;
 const grow=t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"};
 const addP=(t="",n=0)=>addDoc(pc(),{t,o:Date.now()+n,ts:serverTimestamp()}),putP=(id,v)=>setDoc(doc(pc(),id),{t:v,ts:serverTimestamp()},{merge:true});
 const flush=()=>{for(const k in dirty){clearTimeout(tm[k]);const v=dirty[k];delete dirty[k];putP(k,v)}};
@@ -188,24 +190,33 @@ const cp=c=>c.p||[c.a,c.b,c.i].filter(Boolean);
 onSnapshot(query(col("cases"),orderBy("ts","desc"),limit(20)),s=>{cases=s.docs.map(x=>({id:x.id,...x.data()}));$("#hl").innerHTML=cases.map(c=>`<div class="card"><div class="meta">${c.ts?c.ts.toDate().toLocaleString():"now"}</div>${cp(c).map((t,i)=>t?`<div class="txt" style="max-height:3.4em"><b>Pad ${i+1}:</b> ${esc(t.slice(0,90))}</div>`:"").join("")}<div class="row"><button class="p" data-rs="${c.id}">Restore</button><button class="d" data-dh="${c.id}">Delete</button></div></div>`).join("")||'<p class="meta">No saved cases yet.</p>'});
 $("#hl").onclick=e=>{const r=e.target.dataset.rs,d=e.target.dataset.dh;if(d&&confirm("Delete this case?"))deleteDoc(doc(db,"users",uid,"cases",d));
  if(r){const c=cases.find(x=>x.id==r);if(cs()&&!confirm("Replace the current pads? They will be saved to history first."))return;if(cs())keep();setPads(cp(c));$("#dh").close();toast("Restored")}};
-onSnapshot(doc(db,"users",uid,"settings","main"),s=>{const d=s.data()||{};cfg.keys=d.keys||[];cfg.dict=d.dict||"";cfg.model=d.model||"whisper-large-v3";
- if(document.activeElement!==$("#gk"))$("#gk").value=cfg.keys.join("\n");if(document.activeElement!==$("#gd"))$("#gd").value=cfg.dict;$("#gm").value=cfg.model;$("#gc").textContent=cfg.keys.length+(cfg.keys.length==1?" key":" keys")+" saved. Keys rotate automatically if one hits its limit."});
-$("#gs").onclick=()=>{const keys=$("#gk").value.split(/\s+/).filter(Boolean);setDoc(doc(db,"users",uid,"settings","main"),{keys,dict:$("#gd").value,model:$("#gm").value},{merge:true});toast("Settings saved")};
+onSnapshot(doc(db,"users",uid,"settings","main"),s=>{const d=s.data()||{};cfg.keys=d.keys||[];cfg.dict=d.dict||"";cfg.model=d.model||"whisper-large-v3";cfg.clean=d.clean!==false;cfg.cm=d.cm||"openai/gpt-oss-120b";
+ if(document.activeElement!==$("#gk"))$("#gk").value=cfg.keys.join("\n");if(document.activeElement!==$("#gd"))$("#gd").value=cfg.dict;$("#gm").value=cfg.model;$("#gcl").checked=cfg.clean;$("#gcm").value=cfg.cm;$("#gc").textContent=cfg.keys.length+(cfg.keys.length==1?" key":" keys")+" saved. Keys rotate automatically if one hits its limit."});
+$("#gs").onclick=()=>{const keys=$("#gk").value.split(/\s+/).filter(Boolean);setDoc(doc(db,"users",uid,"settings","main"),{keys,dict:$("#gd").value,model:$("#gm").value,clean:$("#gcl").checked,cm:$("#gcm").value},{merge:true});toast("Settings saved")};
 const fix=x=>{x=x.trim();cfg.dict.split("\n").forEach(l=>{if(l.includes("=")&&!l.startsWith("#")){const[a,b]=l.split("=").map(v=>v.trim());if(a)x=x.replace(new RegExp("\\b"+a.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","gi"),b)}});
  return x.replace(/\s*\bnew line\b[.,]?\s*/gi,"\n").replace(/\s*\bnext paragraph\b[.,]?\s*/gi,"\n\n").replace(/\s*\bfull stop\b[.,]?/gi,".")};
 async function transcribe(b){const ks=cfg.keys,n=ks.length,s0=+localStorage.getItem("ss-ki")||0;let err="";
- const prompt=cfg.dict.split("\n").map(x=>x.trim()).filter(x=>x&&!x.startsWith("#")).map(x=>x.includes("=")?x.split("=").pop().trim():x).join(", ").slice(0,800);
+ const terms=cfg.dict.split("\n").map(x=>x.trim()).filter(x=>x&&!x.startsWith("#")).map(x=>x.includes("=")?x.split("=").pop().trim():x).join(", "),prompt=("Radiology report. "+(terms?"Terms: "+terms:"")).slice(0,800);
  const ext=/mp4/.test(b.type)?"m4a":/ogg/.test(b.type)?"ogg":"webm";
  for(let i=0;i<n;i++){const f=new FormData();f.append("file",b,"audio."+ext);f.append("model",cfg.model);f.append("language","en");f.append("temperature","0");f.append("response_format","json");if(prompt)f.append("prompt",prompt);
   try{const r=await fetch("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{Authorization:"Bearer "+ks[(s0+i)%n]},body:f});
    if(r.ok){localStorage.setItem("ss-ki",(s0+i)%n);return fix((await r.json()).text||"")}
    err=r.status==401?"A key was rejected":r.status==429?"Rate limit reached":"Groq error "+r.status}catch{err="Network error"}}
  throw new Error(err+(n>1?" on all keys":""))}
-function ins(t,x){if(!x)return toast("Nothing heard");const a=t.selectionStart??t.value.length,b=t.selectionEnd??a,pre=t.value.slice(0,a),sp=pre&&!/\s$/.test(pre)&&!/^[.,;:\n]/.test(x)?" ":"";t.value=pre+sp+x+t.value.slice(b);const p=(pre+sp+x).length;t.setSelectionRange(p,p);t.dispatchEvent(new Event("input"));t.focus()}
+function ins(t,x){if(!x)return toast("Nothing heard");const a=t.selectionStart??t.value.length,b=t.selectionEnd??a,pre=t.value.slice(0,a);
+ if(!pre.trim()||/[.!?]\s*$/.test(pre)||/\n\s*$/.test(pre))x=x[0].toUpperCase()+x.slice(1);
+ const sp=pre&&!/\s$/.test(pre)&&!/^[.,;:\n]/.test(x)?" ":"";t.value=pre+sp+x+t.value.slice(b);const p=(pre+sp+x).length;t.setSelectionRange(p,p);t.dispatchEvent(new Event("input"));t.focus()}
+async function polish(x){if(!cfg.clean||!x.trim())return x;const ks=cfg.keys,n=ks.length,s0=+localStorage.getItem("ss-ki")||0;
+ const terms=cfg.dict.split("\n").map(v=>v.trim()).filter(v=>v&&!v.startsWith("#")).map(v=>v.includes("=")?v.split("=").pop().trim():v).join(", ");
+ const sys="You clean up dictated radiology report text. Remove filler words (um, uh, you know, like), false starts and accidental repeated words. Fix punctuation and capitalisation: every sentence starts with a capital letter and ends with a full stop. Put a new line when the speaker clearly moves to a different organ, structure or finding, and keep any line breaks already present. "+(terms?"Preferred spellings: "+terms+". Replace words that are clearly mis-heard versions of these terms. ":"")+"NEVER add, remove or change medical content, numbers, measurements, units, left or right, or negations. Do not summarise, explain or add comments. Return only the cleaned text.";
+ const body={model:cfg.cm,temperature:0,messages:[{role:"system",content:sys},{role:"user",content:x}]};if(/gpt-oss/.test(cfg.cm))body.reasoning_effort="low";
+ for(let i=0;i<n;i++){try{const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:"Bearer "+ks[(s0+i)%n],"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(r.ok){const o=((await r.json()).choices?.[0]?.message?.content||"").trim();if(!o||o.length<x.length*.6||o.length>x.length*1.5)break;return o}}catch{}}
+ toast("AI cleanup skipped. Inserted the raw text.");return x}
 let rec=null;async function dictate(t,btn){if(rec){rec.stop();return}if(!cfg.keys.length)return toast("Add a Groq API key in Settings first");
  try{const m=await navigator.mediaDevices.getUserMedia({audio:true}),ch=[],mr=new MediaRecorder(m);rec=mr;btn.textContent="Stop";btn.classList.add("rec");mr.ondataavailable=e=>ch.push(e.data);
   mr.onstop=async()=>{m.getTracks().forEach(x=>x.stop());rec=null;btn.textContent="Working…";btn.disabled=true;btn.classList.remove("rec");
-   try{ins(t,await transcribe(new Blob(ch,{type:mr.mimeType})))}catch(e){toast(e.message||"Dictation failed")}btn.textContent="Dictate";btn.disabled=false};mr.start()}
+   try{const raw=await transcribe(new Blob(ch,{type:mr.mimeType}));btn.textContent="Cleaning…";ins(t,await polish(raw))}catch(e){toast(e.message||"Dictation failed")}btn.textContent="Dictate";btn.disabled=false};mr.start()}
  catch{toast("Microphone blocked. Allow it in the browser settings.")}}
 shared()}
 const sendT=async t=>{t=t.trim();if(!t)return;await addDoc(col("clips"),{kind:"text",text:t,ts:serverTimestamp()});toast("Sent")};
