@@ -55,6 +55,16 @@ body.split main{max-width:1600px;display:grid;grid-template-columns:1fr 1.5fr 1f
  <button class="p" onclick="vf.click()">Upload to vault</button><input type="file" id="vf" multiple class="hide"></div>
  <div class="meta">Images are compressed to under 700 KB. PDFs and other files can be up to 6 MB.</div></div>
  <div class="chips" id="vc"></div><div id="vl"></div></section>
+<section id="t-rep" class="hide"><div class="card"><label class="meta">Template<select id="rt"></select></label>
+<div class="row"><select id="rfp" class="g"></select><button id="rfl">Load from pad</button><button id="rfc">Paste</button></div>
+<textarea id="rf" class="pt" placeholder="Paste or dictate your findings here" style="margin-top:8px"></textarea>
+<div class="row"><button class="p g" id="rg">Generate report</button><button id="rmic">Dictate</button><button class="d" id="rcl">Clear</button></div></div>
+<div class="card hide" id="ro"><b>Report</b> <span class="meta">AI draft. Check every line before use.</span>
+<textarea id="rp" class="pt" style="margin-top:8px"></textarea>
+<div class="row"><button class="p" id="rcp">Copy report</button><button id="rci">Copy impression</button><button id="rsp">Save to new pad</button></div>
+<details id="rch" style="margin-top:8px"><summary class="meta">What the AI changed</summary><div class="txt" id="rcv" style="max-height:none;margin-top:6px"></div></details></div></section>
+<section id="t-tpl" class="hide"><div class="card"><div class="row" style="margin:0"><select id="tcf" class="g"></select><button class="p" id="tnw">New</button></div>
+<input id="tsq" placeholder="Search templates" style="margin-top:8px"><div class="row"><button id="tim">Import JSON</button><button id="tex">Export JSON</button><input type="file" id="tif" accept=".json,application/json" class="hide"></div></div><div id="tl"></div></section>
 <section id="t-set" class="hide">
 <div class="card"><b>Appearance</b><div class="row"><label class="g meta">Theme<select id="sth"><option value="auto">Automatic</option><option value="light">Light</option><option value="dark">Dark</option></select></label><label class="g meta">Text size<select id="sfs"><option value="15">Small</option><option value="16">Normal</option><option value="18">Large</option><option value="20">Extra large</option></select></label></div>
 <div class="row"><label class="g meta">Pad layout<select id="sl"><option value="sb">Side by side</option><option value="st">Stacked</option></select></label></div><div class="meta" style="margin-top:6px">Appearance settings apply to this device only.</div></div>
@@ -64,6 +74,7 @@ body.split main{max-width:1600px;display:grid;grid-template-columns:1fr 1.5fr 1f
 <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="gcl" style="width:auto"> Clean up with AI after dictation (fillers, full stops, capitals, new lines)</label>
 <label class="meta" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="gsy" style="width:auto"> Convert spoken symbols (less than 5 → &lt;5, plus or minus → ±, 2 by 3 → 2 x 3)</label>
 <select id="gcm" style="margin-top:8px"><option value="openai/gpt-oss-120b">Cleanup model: gpt-oss-120b (best)</option><option value="llama-3.3-70b-versatile">Cleanup model: llama-3.3-70b (fast)</option><option value="openai/gpt-oss-20b">Cleanup model: gpt-oss-20b (fastest)</option></select>
+<select id="grm" style="margin-top:8px"><option value="openai/gpt-oss-120b">Report model: gpt-oss-120b (best)</option><option value="llama-3.3-70b-versatile">Report model: llama-3.3-70b (faster)</option></select>
 <div class="meta" style="margin:10px 0 4px"><b>Medical dictionary.</b> Two kinds of line:<br>1) A correct term alone, e.g. <code>IUGR</code>, so the model listens for it.<br>2) A fix for a repeated mistake: what it wrote = what you meant, e.g. <code>iejr = IUGR</code>.<br>Lines starting with # are ignored.</div>
 <div class="row"><button id="gst">Add starter terms (CT, MRI, USG)</button></div>
 <textarea id="gd" style="min-height:140px;margin-top:8px" placeholder="IUGR&#10;iejr = IUGR&#10;bye rads = BI-RADS&#10;hepatosplenomegaly"></textarea>
@@ -71,11 +82,13 @@ body.split main{max-width:1600px;display:grid;grid-template-columns:1fr 1.5fr 1f
 <div class="card"><b>Signed-in devices</b><div class="meta">Devices that opened Swiftshare with your account.</div></div><div id="dl"></div>
 <div class="card"><b>Security</b><div class="row"><button id="out2">Sign out this device</button><button class="d" id="so">Sign out everywhere</button></div><div class="meta" style="margin-top:6px">Sign out everywhere locks out every other device within seconds, even a copied login. You will need to sign in again here.</div></div></section></main>
 <div id="sc" class="hide"></div><aside id="dw" aria-label="Menu"><div class="dh"><b>Swiftshare</b><button id="mc" aria-label="Close menu">✕</button></div>
-<button data-t="clip">Clipboard</button><button data-t="pad">Pad</button><button data-t="vault">Vault</button><button data-t="set">Settings</button><hr>
+<button data-t="clip">Clipboard</button><button data-t="pad">Pad</button><button data-t="vault">Vault</button><button data-t="rep">AI Report</button><button data-t="tpl">Templates</button><button data-t="set">Settings</button><hr>
 <button id="msplit" class="hide">View: side by side</button><button id="msync">Sync now</button><button class="inst hide">Install app</button><hr><button id="out" class="d">Sign out</button></aside></div>
 <dialog id="dz"><b>Resize image for upload</b><div class="row"><button data-k="50" data-p="300">Signature 50 KB</button><button data-k="200" data-p="600">Photo 200 KB</button><button data-k="300" data-p="1200">Certificate 300 KB</button></div>
 <div class="row"><input id="zk" type="number" placeholder="Max KB" style="width:46%"><input id="zp" type="number" placeholder="Max px" style="width:46%"></div>
 <div class="row"><button class="p" id="zg">Download resized</button><button id="zc">Cancel</button></div></dialog>
+<dialog id="td" style="width:min(94vw,640px)"><b id="tdt">Template</b><input id="tc" list="tcl" placeholder="Category (e.g. CT)" style="margin-top:8px"><datalist id="tcl"></datalist><input id="tn" placeholder="Template name" style="margin-top:8px">
+<textarea id="tt" style="margin-top:8px;min-height:45vh" placeholder="Template text"></textarea><div class="row"><button class="p" id="ts">Save</button><button id="tu">Use in AI Report</button><button class="d" id="tdl">Delete</button><button id="tcn">Close</button></div></dialog>
 <dialog id="dh"><b>Case history</b><div id="hl" style="max-height:60vh;overflow:auto;margin-top:8px"></div><div class="row"><button id="hc">Close</button></div></dialog><div id="toast"></div>
 <script>
 localStorage.removeItem("ss-local-pad");
@@ -86,7 +99,7 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signInWithEmailAndPassword,sendPasswordResetEmail,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot as _os,getDocs,getDoc,getDocFromServer,waitForPendingWrites,disableNetwork,enableNetwork,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import{initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,addDoc,setDoc,deleteDoc,onSnapshot as _os,getDocs,getDoc,writeBatch,getDocFromServer,waitForPendingWrites,disableNetwork,enableNetwork,query,orderBy,limit,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCycW4ktbTN5MBSGekAXvHcq6eh91IhmP8",authDomain:"swiftshare-c4006.firebaseapp.com",projectId:"swiftshare-c4006",storageBucket:"swiftshare-c4006.firebasestorage.app",messagingSenderId:"1029761340395",appId:"1:1029761340395:web:3397c80f3b9b3859acbfae"});
 const auth=getAuth(app),db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true,localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const $=s=>document.querySelector(s),MAX=700*1024,BIG=6*1048576,CH=800000;let uid,tag="All",vault=[],zi=null;
@@ -103,10 +116,10 @@ $("#ei").onclick=async()=>{try{await signInWithEmailAndPassword(auth,$("#le").va
 $("#lr").onclick=async()=>{const m=$("#le").value.trim();if(!m)return em("Enter your email first.");try{await sendPasswordResetEmail(auth,m);em("Check your email for a link to set your password.")}catch{em("Could not send the email. Check the address.")}};
 
 onAuthStateChanged(auth,u=>{document.documentElement.classList.toggle("in",!!u);localStorage.setItem("ss-in",u?"1":"0");if(u&&u.uid!==uid){uid=u.uid;start()}});
-const T={clip:"Clipboard",pad:"Pad",vault:"Vault",set:"Settings"};let cur=T[localStorage.getItem("ss-tab")]?localStorage.getItem("ss-tab"):"clip",split=localStorage.getItem("ss-split")=="1";
-const show=()=>{const wide=innerWidth>=900,sp=split&&wide;document.body.classList.toggle("split",sp&&cur!="set");$("#msplit").classList.toggle("hide",!wide);$("#msplit").textContent="View: "+(split?"one page at a time":"side by side");
- for(const t in T)$("#t-"+t).classList.toggle("hide",!(sp?(cur=="set"?t=="set":t!="set"):t==cur));
- $("#ttl").textContent=sp&&cur!="set"?"Swiftshare":T[cur];document.querySelectorAll("#dw [data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t==cur))};
+const T={clip:"Clipboard",pad:"Pad",vault:"Vault",rep:"AI Report",tpl:"Templates",set:"Settings"};let cur=T[localStorage.getItem("ss-tab")]?localStorage.getItem("ss-tab"):"clip",split=localStorage.getItem("ss-split")=="1";
+const show=()=>{const wide=innerWidth>=900,sp=split&&wide&&["clip","pad","vault"].includes(cur);document.body.classList.toggle("split",sp);$("#msplit").classList.toggle("hide",!wide);$("#msplit").textContent="View: "+(split?"one page at a time":"side by side");
+ for(const t in T)$("#t-"+t).classList.toggle("hide",!(sp?["clip","pad","vault"].includes(t):t==cur));
+ $("#ttl").textContent=sp?"Swiftshare":T[cur];document.querySelectorAll("#dw [data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t==cur))};
 const menu=o=>{$("#dw").classList.toggle("open",o);$("#sc").classList.toggle("hide",!o)};
 $("#mb").onclick=()=>menu(true);$("#mc").onclick=$("#sc").onclick=()=>menu(false);
 document.querySelectorAll("#dw [data-t]").forEach(b=>b.onclick=()=>{cur=b.dataset.t;localStorage.setItem("ss-tab",cur);show();menu(false);scrollTo(0,0)});
@@ -145,7 +158,7 @@ $("#zg").onclick=async()=>{const k=+$("#zk").value,p=+$("#zp").value;if(!k||!p)r
 function start(){
  onSnapshot(query(col("clips"),orderBy("ts","desc"),limit(50)),s=>{store.clips=s.docs.map(x=>({id:x.id,...x.data()}));$("#cl").innerHTML=store.clips.map(d=>card(d,"clips",d.id)).join("")||'<p class="meta">Nothing here yet. Send text or a file from this device and it appears on your other one.</p>'});
  onSnapshot(query(col("vault"),orderBy("ts","desc")),s=>{store.vault=s.docs.map(x=>({id:x.id,...x.data()}));drawV()});
- const pc=()=>col("pads"),dirty={},tm={},cfg={keys:[],dict:"",model:"whisper-large-v3",clean:true,sym:true,cm:"openai/gpt-oss-120b"},ps=t=>$("#ps").textContent=t;let pads=[],ens=0;
+ const pc=()=>col("pads"),dirty={},tm={},cfg={keys:[],dict:"",model:"whisper-large-v3",clean:true,sym:true,cm:"openai/gpt-oss-120b",rm:"openai/gpt-oss-120b"},ps=t=>$("#ps").textContent=t;let pads=[],ens=0;
 const grow=t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"};
 const addP=(t="",n=0)=>addDoc(pc(),{t,o:Date.now()+n,ts:serverTimestamp()}),putP=(id,v)=>setDoc(doc(pc(),id),{t:v,ts:serverTimestamp()},{merge:true});
 const flush=()=>{for(const k in dirty){clearTimeout(tm[k]);const v=dirty[k];delete dirty[k];putP(k,v)}};
@@ -158,7 +171,7 @@ function draw(){const g=$("#pg"),ids=pads.map(p=>p.id);[...g.children].forEach(c
    const t=c.querySelector("textarea");t.oninput=()=>{dirty[p.id]=t.value;grow(t);ps("Typing…");clearTimeout(tm[p.id]);tm[p.id]=setTimeout(()=>{const v=dirty[p.id];delete dirty[p.id];putP(p.id,v)},250)};t.onblur=flush}
   c.querySelector(".pn").textContent="Pad "+(i+1);const t=c.querySelector("textarea");
   if(!(p.id in dirty)&&document.activeElement!==t&&t.value!==(p.t||""))t.value=p.t||"";
-  if(g.children[i]!==c)g.insertBefore(c,g.children[i]||null);grow(t)})}
+  if(g.children[i]!==c)g.insertBefore(c,g.children[i]||null);grow(t)});fillPadSel()}
 onSnapshot(query(pc(),orderBy("o")),{includeMetadataChanges:true},s=>{pads=s.docs.map(d=>({id:d.id,...d.data()}));if(!pads.length&&!s.metadata.fromCache)ensure();draw();st(s)});
 $("#ap").onclick=()=>{addP("");setTimeout(()=>$("#pg").lastElementChild?.querySelector("textarea")?.focus(),500)};
 $("#pg").onclick=e=>{const x=e.target.dataset.x,c=e.target.closest(".pc");if(!x||!c)return;const id=c.dataset.id,t=c.querySelector("textarea");
@@ -192,9 +205,9 @@ const cp=c=>c.p||[c.a,c.b,c.i].filter(Boolean);
 onSnapshot(query(col("cases"),orderBy("ts","desc"),limit(20)),s=>{cases=s.docs.map(x=>({id:x.id,...x.data()}));$("#hl").innerHTML=cases.map(c=>`<div class="card"><div class="meta">${c.ts?c.ts.toDate().toLocaleString():"now"}</div>${cp(c).map((t,i)=>t?`<div class="txt" style="max-height:3.4em"><b>Pad ${i+1}:</b> ${esc(t.slice(0,90))}</div>`:"").join("")}<div class="row"><button class="p" data-rs="${c.id}">Restore</button><button class="d" data-dh="${c.id}">Delete</button></div></div>`).join("")||'<p class="meta">No saved cases yet.</p>'});
 $("#hl").onclick=e=>{const r=e.target.dataset.rs,d=e.target.dataset.dh;if(d&&confirm("Delete this case?"))deleteDoc(doc(db,"users",uid,"cases",d));
  if(r){const c=cases.find(x=>x.id==r);if(cs()&&!confirm("Replace the current pads? They will be saved to history first."))return;if(cs())keep();setPads(cp(c));$("#dh").close();toast("Restored")}};
-onSnapshot(doc(db,"users",uid,"settings","main"),s=>{const d=s.data()||{};cfg.keys=d.keys||[];cfg.dict=d.dict||"";cfg.model=d.model||"whisper-large-v3";cfg.clean=d.clean!==false;cfg.sym=d.sym!==false;cfg.cm=d.cm||"openai/gpt-oss-120b";
- if(document.activeElement!==$("#gk"))$("#gk").value=cfg.keys.join("\n");if(document.activeElement!==$("#gd"))$("#gd").value=cfg.dict;$("#gm").value=cfg.model;$("#gcl").checked=cfg.clean;$("#gsy").checked=cfg.sym;$("#gcm").value=cfg.cm;$("#gc").textContent=cfg.keys.length+(cfg.keys.length==1?" key":" keys")+" saved. Keys rotate automatically if one hits its limit."});
-$("#gs").onclick=()=>{const keys=$("#gk").value.split(/\s+/).filter(Boolean);setDoc(doc(db,"users",uid,"settings","main"),{keys,dict:$("#gd").value,model:$("#gm").value,clean:$("#gcl").checked,sym:$("#gsy").checked,cm:$("#gcm").value},{merge:true});toast("Settings saved")};
+onSnapshot(doc(db,"users",uid,"settings","main"),s=>{const d=s.data()||{};cfg.keys=d.keys||[];cfg.dict=d.dict||"";cfg.model=d.model||"whisper-large-v3";cfg.clean=d.clean!==false;cfg.sym=d.sym!==false;cfg.cm=d.cm||"openai/gpt-oss-120b";cfg.rm=d.rm||"openai/gpt-oss-120b";
+ if(document.activeElement!==$("#gk"))$("#gk").value=cfg.keys.join("\n");if(document.activeElement!==$("#gd"))$("#gd").value=cfg.dict;$("#gm").value=cfg.model;$("#gcl").checked=cfg.clean;$("#gsy").checked=cfg.sym;$("#gcm").value=cfg.cm;$("#grm").value=cfg.rm;$("#gc").textContent=cfg.keys.length+(cfg.keys.length==1?" key":" keys")+" saved. Keys rotate automatically if one hits its limit."});
+$("#gs").onclick=()=>{const keys=$("#gk").value.split(/\s+/).filter(Boolean);setDoc(doc(db,"users",uid,"settings","main"),{keys,dict:$("#gd").value,model:$("#gm").value,clean:$("#gcl").checked,sym:$("#gsy").checked,cm:$("#gcm").value,rm:$("#grm").value},{merge:true});toast("Settings saved")};
 const tl=()=>cfg.dict.split("\n").map(x=>x.trim()).filter(x=>x&&!x.startsWith("#")).map(x=>x.includes("=")?x.slice(x.indexOf("=")+1).trim():x).filter(x=>/[a-z0-9]/i.test(x));
 const dic=x=>{cfg.dict.split("\n").forEach(l=>{if(l.includes("=")&&!l.trim().startsWith("#")){const i=l.indexOf("="),a=l.slice(0,i).trim(),b=l.slice(i+1).trim();if(a&&b)x=x.replace(new RegExp("\\b"+a.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","gi"),()=>b)}});return x};
 const sym=x=>!cfg.sym?x:x.replace(/\bless than or equal to\s+(?=[\d.])/gi,"≤").replace(/\b(?:greater|more) than or equal to\s+(?=[\d.])/gi,"≥").replace(/\bless than\s+(?=[\d.])/gi,"<").replace(/\b(?:greater|more) than\s+(?=[\d.])/gi,">").replace(/\bplus or minus\s*/gi,"±").replace(/(\d)\s*degrees?\b/gi,"$1°").replace(/(\d)\s*per\s?cent\b/gi,"$1%").replace(/(\d(?:\.\d+)?)\s*(?:by|x)\s+(?=\d)/gi,"$1 x ");
@@ -224,6 +237,44 @@ let rec=null;async function dictate(t,btn){if(rec){rec.stop();return}if(!cfg.key
   mr.onstop=async()=>{m.getTracks().forEach(x=>x.stop());rec=null;btn.textContent="Working…";btn.disabled=true;btn.classList.remove("rec");
    try{const raw=await transcribe(new Blob(ch,{type:mr.mimeType}));btn.textContent="Cleaning…";ins(t,sym(dic(await polish(raw))))}catch(e){toast(e.message||"Dictation failed")}btn.textContent="Dictate";btn.disabled=false};mr.start()}
  catch{toast("Microphone blocked. Allow it in the browser settings.")}}
+
+const RULES="You are a radiology reporting assistant. You receive a REPORT TEMPLATE (a normal study with headings and an impression) and the radiologist's DICTATED FINDINGS, and you write the final report. Rules: (1) Keep the template's title, headings, section order and bullet style. Plain text only, no markdown. (2) Put each dictated finding in the section where it belongs, in concise standard radiological language. Fix grammar and terminology but add no detail, measurement, side or cause that was not dictated. (3) Delete or rewrite every template normal statement that the findings contradict or make untrue, including indirect effects. Example: with a midline shift, remove 'no midline shift' and do not keep 'ventricles normal in size and configuration' unless the dictation supports it. Example: with maxillary sinusitis, rewrite the sinuses line to describe the maxillary sinus finding and say the remaining sinuses are clear. (4) Keep every other template normal statement unchanged, including for structures not mentioned, so the rest of the study reads as normal. (5) Never invent abnormal findings. If a normal statement is no longer valid but the dictation gives no replacement wording, delete it and list it under NEEDS REVIEW. (6) Copy numbers, units, measurements and laterality (left or right) exactly as dictated. Keep template placeholders such as [..] or ___ unchanged unless the dictation supplies the value. (7) Rewrite the IMPRESSION: list abnormal findings first in order of importance, numbered if more than one; add diagnoses or recommendations only if dictated; if nothing is abnormal keep the normal impression. (8) Output exactly this layout: a line =====REPORT===== then the full report, then a line =====CHANGES===== then a short bullet list of the template normal statements you removed or rewrote and why, then any NEEDS REVIEW items; write None if nothing changed.";
+async function groqChat(body){const ks=cfg.keys,n=ks.length,s0=+localStorage.getItem("ss-ki")||0;let err="";
+ for(let i=0;i<n;i++){try{const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:"Bearer "+ks[(s0+i)%n],"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(r.ok){localStorage.setItem("ss-ki",(s0+i)%n);return await r.json()}err=r.status==401?"A key was rejected":r.status==429?"Rate limit reached":"Groq error "+r.status}catch{err="Network error"}}
+ throw new Error(err+(n>1?" on all keys":""))}
+async function report(tpl,find){const terms=tl().join(", "),body={model:cfg.rm,temperature:.1,max_tokens:6000,messages:[{role:"system",content:RULES+(terms?" Preferred spellings: "+terms+".":"")},{role:"user",content:"REPORT TEMPLATE:\n"+tpl+"\n\nDICTATED FINDINGS:\n"+find}]};
+ if(/gpt-oss/.test(cfg.rm))body.reasoning_effort="medium";const x=(await groqChat(body)).choices?.[0]?.message?.content||"";if(!x.trim())throw new Error("The model returned nothing. Try again.");
+ const[a,c]=x.split(/=====CHANGES=====/);return{r:dic(a.replace(/=====REPORT=====/,"").trim()),c:(c||"").trim()}}
+function fillPadSel(){const s=$("#rfp"),v=s.value;s.innerHTML=pads.map((p,i)=>`<option value="${i}">From Pad ${i+1}</option>`).join("");if(v&&+v<pads.length)s.value=v}
+$("#rfl").onclick=()=>{const t=texts()[+$("#rfp").value];if(t==null)return;$("#rf").value=t;grow($("#rf"))};
+$("#rfc").onclick=async()=>{try{$("#rf").value=await navigator.clipboard.readText();grow($("#rf"))}catch{toast("Allow clipboard access, or paste into the box")}};
+$("#rf").oninput=()=>grow($("#rf"));$("#rp").oninput=()=>grow($("#rp"));$("#rmic").onclick=()=>dictate($("#rf"),$("#rmic"));
+$("#rcl").onclick=()=>{$("#rf").value="";grow($("#rf"))};
+$("#rg").onclick=async()=>{const t=tpls.find(x=>x.id==$("#rt").value),f=$("#rf").value.trim();if(!t)return toast("Choose a template");if(!f)return toast("Add your findings first");if(!cfg.keys.length)return toast("Add a Groq API key in Settings first");
+ const b=$("#rg");b.disabled=true;b.textContent="Generating…";
+ try{const o=await report(t.text,f);$("#rp").value=o.r;grow($("#rp"));$("#rcv").textContent=o.c||"None";$("#ro").classList.remove("hide");$("#rch").open=!!o.c&&!/^none\W*$/i.test(o.c);$("#ro").scrollIntoView({behavior:"smooth"})}catch(e){toast(e.message||"Failed")}b.disabled=false;b.textContent="Generate report"};
+$("#rcp").onclick=()=>copy($("#rp").value);$("#rci").onclick=()=>{const x=$("#rp").value,k=x.toLowerCase().lastIndexOf("impression");copy(k<0?x:x.slice(k+10).replace(/^[\s:]+/,""))};
+$("#rsp").onclick=()=>{addP($("#rp").value);toast("Saved as a new pad")};
+let tpls=[],edId=null;const CO=["X-Ray","USG","Doppler","Obstetrics","CT","MRI","Other"],tcol=()=>col("templates");
+const tsort=(a,b)=>{const i=CO.indexOf(a.cat),j=CO.indexOf(b.cat);return(i<0?99:i)-(j<0?99:j)||a.cat.localeCompare(b.cat)||(a.o||0)-(b.o||0)||a.name.localeCompare(b.name)};
+function fillRT(){const sel=$("#rt"),v=sel.value,g={};tpls.forEach(t=>(g[t.cat]=g[t.cat]||[]).push(t));sel.innerHTML=Object.keys(g).map(c=>`<optgroup label="${esc(c)}">${g[c].map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("")}</optgroup>`).join("")||"<option value=''>No templates yet. Add some in Templates</option>";if(tpls.some(t=>t.id==v))sel.value=v}
+function drawT(){const cats=[...new Set(tpls.map(t=>t.cat))],cf=$("#tcf"),v=cf.value;cf.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join("");cf.value=cats.includes(v)?v:"";
+ $("#tcl").innerHTML=cats.map(c=>`<option value="${esc(c)}">`).join("");const q=$("#tsq").value.toLowerCase(),l=tpls.filter(t=>(!cf.value||t.cat==cf.value)&&(!q||(t.name+" "+t.text).toLowerCase().includes(q)));
+ $("#tl").innerHTML=l.length?l.map(t=>`<div class="card" data-tid="${t.id}" style="cursor:pointer"><b>${esc(t.name)}</b> <span class="meta">${esc(t.cat)}</span><div class="meta">${esc(t.text.replace(/\s+/g," ").slice(0,90))}</div></div>`).join(""):(tpls.length?'<p class="meta">No matching templates.</p>':'<div class="card"><b>Your template bank is empty</b><div class="meta">Load the 67 starter templates, or tap Import JSON to use your own file.</div><div class="row"><button class="p" id="tsd">Load starter templates</button></div></div>')}
+onSnapshot(tcol(),s=>{tpls=s.docs.map(d=>({id:d.id,...d.data()})).sort(tsort);drawT();fillRT()});
+const openT=t=>{edId=t?.id||null;$("#tdt").textContent=t?"Edit template":"New template";$("#tc").value=t?.cat||$("#tcf").value||"";$("#tn").value=t?.name||"";$("#tt").value=t?.text||"";$("#tdl").classList.toggle("hide",!t);$("#tu").classList.toggle("hide",!t);$("#td").showModal()};
+$("#tl").onclick=e=>{if(e.target.id=="tsd")return loadStarter();const c=e.target.closest("[data-tid]");if(c)openT(tpls.find(x=>x.id==c.dataset.tid))};
+$("#tcf").onchange=drawT;$("#tsq").oninput=drawT;$("#tnw").onclick=()=>openT(null);$("#tcn").onclick=()=>$("#td").close();
+$("#ts").onclick=()=>{const cat=$("#tc").value.trim(),name=$("#tn").value.trim(),text=$("#tt").value;if(!cat||!name||!text.trim())return toast("Category, name and text are required");const old=tpls.find(x=>x.id==edId);
+ setDoc(edId?doc(tcol(),edId):doc(tcol()),{cat,name,text,o:old?.o??Date.now(),ts:serverTimestamp()},{merge:true});$("#td").close();toast("Template saved")};
+$("#tdl").onclick=()=>{if(edId&&confirm("Delete this template?")){deleteDoc(doc(tcol(),edId));$("#td").close()}};
+$("#tu").onclick=()=>{$("#rt").value=edId;$("#td").close();cur="rep";localStorage.setItem("ss-tab","rep");show();scrollTo(0,0)};
+async function importObj(o){const rows=[];let n=0;for(const c in o)for(const nm in o[c])if(typeof o[c][nm]=="string")rows.push({cat:c,name:nm,text:o[c][nm],o:n++});if(!rows.length)return toast("No templates found in that file");
+ for(let i=0;i<rows.length;i+=100){const wb=writeBatch(db);rows.slice(i,i+100).forEach(r=>wb.set(doc(tcol(),(r.cat+"__"+r.name).replace(/[\/\s]+/g,"-")),{...r,ts:serverTimestamp()}));await wb.commit()}toast(rows.length+" templates imported")}
+async function loadStarter(){try{const r=await fetch("templates.json",{cache:"no-store"});if(!r.ok)throw 0;await importObj(await r.json())}catch{toast("Could not load templates.json. Use Import JSON.")}}
+$("#tim").onclick=()=>$("#tif").click();$("#tif").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f||!confirm("Templates with the same category and name will be overwritten. Continue?"))return;try{await importObj(JSON.parse(await f.text()))}catch{toast("That file is not valid JSON")}};
+$("#tex").onclick=()=>{const o={};tpls.forEach(t=>(o[t.cat]=o[t.cat]||{})[t.name]=t.text);const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,1)],{type:"application/json"}));a.download="swiftshare-templates.json";a.click()};
 shared()}
 const sendT=async t=>{t=t.trim();if(!t)return;await addDoc(col("clips"),{kind:"text",text:t,ts:serverTimestamp()});toast("Sent")};
 $("#send").onclick=async()=>{await sendT($("#ci").value);$("#ci").value=""};
