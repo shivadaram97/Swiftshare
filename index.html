@@ -25,7 +25,7 @@ nav button.on{color:var(--ac);box-shadow:inset 0 3px var(--ac)}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}.chips button{white-space:nowrap}.chips .on{background:var(--ac);color:var(--on)}
 #login{padding:16px 0}#app{display:none}html.in #app{display:block}html.in #login{display:none}header{gap:8px}header #ps{flex:1;text-align:right;font-size:12px}
 #pg{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}.pc{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:8px;min-width:0}.pc:last-child:nth-child(odd){grid-column:1/-1}
-.pt{min-height:9em;resize:none;overflow:hidden}.pn{font-weight:600;margin-bottom:6px;color:var(--mu)}#pg.st{grid-template-columns:1fr}#pg.st .pc:last-child{grid-column:auto}
+.pt{min-height:9em;resize:none;overflow:auto;max-height:85vh}.pn{font-weight:600;margin-bottom:6px;color:var(--mu)}#pg.st{grid-template-columns:1fr}#pg.st .pc:last-child{grid-column:auto}
 button.rec{background:var(--dg);color:#fff;border-color:var(--dg)}.keys{-webkit-text-security:disc}.hide{display:none!important}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.s{opacity:1}dialog{border:1px solid var(--bd);border-radius:12px;background:var(--cd);color:var(--tx);width:min(92vw,380px)}
@@ -60,7 +60,7 @@ body.split main{max-width:1600px;display:grid;grid-template-columns:1fr 1.5fr 1f
 <textarea id="rf" class="pt" placeholder="Paste or dictate your findings here" style="margin-top:8px"></textarea>
 <div class="row"><button class="p g" id="rg">Generate report</button><button id="rmic">Dictate</button><button class="d" id="rcl">Clear</button></div></div>
 <div class="card hide" id="ro"><b>Report</b> <span class="meta">AI draft. Check every line before use.</span>
-<textarea id="rp" class="pt" style="margin-top:8px"></textarea>
+<textarea id="rp" class="pt" style="margin-top:8px;max-height:75vh"></textarea>
 <div class="row"><button class="p" id="rcp">Copy report</button><button id="rci">Copy impression</button><button id="rsp">Save to new pad</button></div>
 <details id="rch" style="margin-top:8px"><summary class="meta">What the AI changed</summary><div class="txt" id="rcv" style="max-height:none;margin-top:6px"></div></details></div></section>
 <section id="t-tpl" class="hide"><div class="card"><div class="row" style="margin:0"><select id="tcf" class="g"></select><button class="p" id="tnw">New</button></div>
@@ -119,7 +119,7 @@ onAuthStateChanged(auth,u=>{document.documentElement.classList.toggle("in",!!u);
 const T={clip:"Clipboard",pad:"Pad",vault:"Vault",rep:"AI Report",tpl:"Templates",set:"Settings"};let cur=T[localStorage.getItem("ss-tab")]?localStorage.getItem("ss-tab"):"clip",split=localStorage.getItem("ss-split")=="1";
 const show=()=>{const wide=innerWidth>=900,sp=split&&wide&&["clip","pad","vault"].includes(cur);document.body.classList.toggle("split",sp);$("#msplit").classList.toggle("hide",!wide);$("#msplit").textContent="View: "+(split?"one page at a time":"side by side");
  for(const t in T)$("#t-"+t).classList.toggle("hide",!(sp?["clip","pad","vault"].includes(t):t==cur));
- $("#ttl").textContent=sp?"Swiftshare":T[cur];document.querySelectorAll("#dw [data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t==cur))};
+ $("#ttl").textContent=sp?"Swiftshare":T[cur];document.querySelectorAll("#dw [data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t==cur));document.querySelectorAll("textarea.pt").forEach(t=>{if(t.offsetParent){t.style.height="auto";t.style.height=t.scrollHeight+"px"}})};
 const menu=o=>{$("#dw").classList.toggle("open",o);$("#sc").classList.toggle("hide",!o)};
 $("#mb").onclick=()=>menu(true);$("#mc").onclick=$("#sc").onclick=()=>menu(false);
 document.querySelectorAll("#dw [data-t]").forEach(b=>b.onclick=()=>{cur=b.dataset.t;localStorage.setItem("ss-tab",cur);show();menu(false);scrollTo(0,0)});
@@ -159,7 +159,7 @@ function start(){
  onSnapshot(query(col("clips"),orderBy("ts","desc"),limit(50)),s=>{store.clips=s.docs.map(x=>({id:x.id,...x.data()}));$("#cl").innerHTML=store.clips.map(d=>card(d,"clips",d.id)).join("")||'<p class="meta">Nothing here yet. Send text or a file from this device and it appears on your other one.</p>'});
  onSnapshot(query(col("vault"),orderBy("ts","desc")),s=>{store.vault=s.docs.map(x=>({id:x.id,...x.data()}));drawV()});
  const pc=()=>col("pads"),dirty={},tm={},cfg={keys:[],dict:"",model:"whisper-large-v3",clean:true,sym:true,cm:"openai/gpt-oss-120b",rm:"openai/gpt-oss-120b"},ps=t=>$("#ps").textContent=t;let pads=[],ens=0;
-const grow=t=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"};
+const grow=t=>{if(!t.offsetParent)return;t.style.height="auto";t.style.height=t.scrollHeight+"px"};
 const addP=(t="",n=0)=>addDoc(pc(),{t,o:Date.now()+n,ts:serverTimestamp()}),putP=(id,v)=>setDoc(doc(pc(),id),{t:v,ts:serverTimestamp()},{merge:true});
 const flush=()=>{for(const k in dirty){clearTimeout(tm[k]);const v=dirty[k];delete dirty[k];putP(k,v)}};
 const st=s=>ps(!navigator.onLine?"Offline. Saved on this device":s.metadata.hasPendingWrites?"Saving…":s.metadata.fromCache?"Waiting for server…":"Synced");
@@ -238,14 +238,33 @@ let rec=null;async function dictate(t,btn){if(rec){rec.stop();return}if(!cfg.key
    try{const raw=await transcribe(new Blob(ch,{type:mr.mimeType}));btn.textContent="Cleaning…";ins(t,sym(dic(await polish(raw))))}catch(e){toast(e.message||"Dictation failed")}btn.textContent="Dictate";btn.disabled=false};mr.start()}
  catch{toast("Microphone blocked. Allow it in the browser settings.")}}
 
-const RULES="You are a radiology reporting assistant. You receive a REPORT TEMPLATE (a normal study with headings and an impression) and the radiologist's DICTATED FINDINGS, and you write the final report. Rules: (1) Keep the template's title, headings, section order and bullet style. Plain text only, no markdown. (2) Put each dictated finding in the section where it belongs, in concise standard radiological language. Fix grammar and terminology but add no detail, measurement, side or cause that was not dictated. (3) Delete or rewrite every template normal statement that the findings contradict or make untrue, including indirect effects. Example: with a midline shift, remove 'no midline shift' and do not keep 'ventricles normal in size and configuration' unless the dictation supports it. Example: with maxillary sinusitis, rewrite the sinuses line to describe the maxillary sinus finding and say the remaining sinuses are clear. (4) Keep every other template normal statement unchanged, including for structures not mentioned, so the rest of the study reads as normal. (5) Never invent abnormal findings. If a normal statement is no longer valid but the dictation gives no replacement wording, delete it and list it under NEEDS REVIEW. (6) Copy numbers, units, measurements and laterality (left or right) exactly as dictated. Keep template placeholders such as [..] or ___ unchanged unless the dictation supplies the value. (7) Rewrite the IMPRESSION: list abnormal findings first in order of importance, numbered if more than one; add diagnoses or recommendations only if dictated; if nothing is abnormal keep the normal impression. (8) Output exactly this layout: a line =====REPORT===== then the full report, then a line =====CHANGES===== then a short bullet list of the template normal statements you removed or rewrote and why, then any NEEDS REVIEW items; write None if nothing changed.";
+const RULES="You are a radiology reporting assistant. Input: the numbered TEMPLATE LINES of a normal report (lines marked [H] are headings or fixed text and must not be changed), the TEMPLATE IMPRESSION, and the radiologist's DICTATED FINDINGS. Do NOT write the report. Return one JSON object that edits the template.\nProcedure: go through EVERY numbered line that is not marked [H]. For each, decide whether the dictated findings contradict it or make it untrue, in whole or in part, including indirect effects (a midline shift means the ventricles and cisterns are not simply normal; an effusion makes 'no effusion' false; sinusitis makes 'sinuses clear' false).\nJSON keys:\n\"d\": object mapping a line number (as a string) to a decision, only for lines you change. Use \"D|short reason\" to delete the line, or \"R|new text|short reason\" to rewrite it. If only part of a compound normal line is contradicted, rewrite it to keep the still-valid part (for example 'No evidence of pulmonary edema or effusion' with an effusion dictated becomes R|No pulmonary edema.|effusion present). If a line says a structure or region is normal but an abnormality is dictated in it, rewrite it so the unaffected remainder is stated as normal, using the template's own wording (for example 'Clear lung fields with no focal consolidation' with a right lower zone opacity becomes R|Rest of the lung fields are clear.|...; 'Normal grey-white differentiation' with a bleed becomes R|Rest of the brain parenchyma shows normal grey-white differentiation.|...). Delete a line only if nothing in it remains valid. Keep a label such as 'Liver:' at the start of a rewritten line.\n\"add\": array of {\"after\":N,\"t\":\"text\"} that adds each dictated finding as a new line after template line N (use the section heading line, or the last line of that section if no normal line is affected), in concise standard radiological language, in the order dictated. Do not add any detail, measurement, side or cause that was not dictated. Never invent abnormal findings. Plain sentences, no bullets, no asterisks.\n\"imp\": array of impression lines: abnormal findings first in order of importance; add diagnoses or recommendations only if dictated; if nothing abnormal is dictated return the template impression lines unchanged.\n\"review\": array of short strings for anything you could not resolve, such as a normal line that is no longer valid but cannot be reworded, or a dictated finding you could not place.\nCopy numbers, units, measurements and left or right exactly as dictated. Output only the JSON object.";
 async function groqChat(body){const ks=cfg.keys,n=ks.length,s0=+localStorage.getItem("ss-ki")||0;let err="";
  for(let i=0;i<n;i++){try{const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:"Bearer "+ks[(s0+i)%n],"Content-Type":"application/json"},body:JSON.stringify(body)});
   if(r.ok){localStorage.setItem("ss-ki",(s0+i)%n);return await r.json()}err=r.status==401?"A key was rejected":r.status==429?"Rate limit reached":"Groq error "+r.status}catch{err="Network error"}}
  throw new Error(err+(n>1?" on all keys":""))}
-async function report(tpl,find){const terms=tl().join(", "),body={model:cfg.rm,temperature:.1,max_tokens:6000,messages:[{role:"system",content:RULES+(terms?" Preferred spellings: "+terms+".":"")},{role:"user",content:"REPORT TEMPLATE:\n"+tpl+"\n\nDICTATED FINDINGS:\n"+find}]};
- if(/gpt-oss/.test(cfg.rm))body.reasoning_effort="medium";const x=(await groqChat(body)).choices?.[0]?.message?.content||"";if(!x.trim())throw new Error("The model returned nothing. Try again.");
- const[a,c]=x.split(/=====CHANGES=====/);return{r:dic(a.replace(/=====REPORT=====/,"").trim()),c:(c||"").trim()}}
+function parseT(text){const body=[],imp=[];let inI=false;
+ for(const raw of text.replace(/\r/g,"").split("\n")){const t=raw.trim().replace(/^(?:[*•▪\-–]|o)\s+/,"").replace(/^\*+|\*+$/g,"").trim(),m=!inI&&t.match(/^impression\b\s*:?\s*(.*)$/i);
+  if(m){inI=true;if(m[1])imp.push(m[1].replace(/^(?:[*•\-–]|\d+[.)])\s*/,""));continue}
+  if(inI){if(t)imp.push(t.replace(/^(?:[*•\-–]|\d+[.)])\s*/,""));continue}body.push(t)}
+ while(body.length&&!body[body.length-1])body.pop();let n=0;
+ return{S:body.map(t=>{if(!t)return{b:1};n++;return{n,t,h:/:\s*$/.test(t)||(t===t.toUpperCase()&&/[A-Z]/.test(t))||/\[[^\]]*\]|_{2,}/.test(t)}}),imp}}
+function assemble(S,timp,j){const d=j.d||{},add=Array.isArray(j.add)?j.add:[],cl=v=>String(v||"").replace(/^[\s*•▪\-–]+/,"").replace(/\*+/g,"").trim(),out=[],ch=[],ids=new Set(S.filter(x=>x.n).map(x=>x.n));
+ const addAfter=k=>add.filter(z=>+z.after==k).forEach(z=>{const t=cl(z.t);if(t){out.push(t);ch.push("Added: "+t)}});
+ for(const x of S){if(x.b){out.push("");continue}const p=(x.h?"":String(d[x.n]||"")).split("|");
+  if(p[0].trim()=="D")ch.push("Removed: "+x.t+(p[1]?" ("+p[1].trim()+")":""));
+  else if(p[0].trim()=="R"&&cl(p[1])){const t=cl(p[1]);out.push(t);ch.push("Rewritten: "+x.t+" → "+t+(p[2]?" ("+p[2].trim()+")":""))}
+  else out.push(x.t);addAfter(x.n)}
+ add.filter(z=>!ids.has(+z.after)).forEach(z=>{const t=cl(z.t);if(t){out.push(t);ch.push("NEEDS REVIEW: placed at the end, check the section: "+t)}});
+ const im=(Array.isArray(j.imp)&&j.imp.length?j.imp:timp).map(v=>cl(v).replace(/^\d+[.)]\s*/,"")).filter(Boolean);
+ if(out.length&&out[out.length-1])out.push("");out.push("IMPRESSION:");im.forEach((t,i)=>out.push(im.length>1?(i+1)+". "+t:t));
+ (Array.isArray(j.review)?j.review:[]).forEach(r=>ch.push("NEEDS REVIEW: "+r));return{r:dic(out.join("\n")),c:ch}}
+async function report(tpl,find){const{S,imp}=parseT(tpl),terms=tl().join(", "),
+ user="TEMPLATE LINES:\n"+S.filter(x=>x.n).map(x=>x.n+(x.h?" [H] ":" ")+x.t).join("\n")+"\n\nTEMPLATE IMPRESSION:\n"+(imp.join("\n")||"(none)")+"\n\nDICTATED FINDINGS:\n"+find,
+ body={model:cfg.rm,temperature:.1,max_tokens:6000,messages:[{role:"system",content:RULES+(terms?" Preferred spellings: "+terms+".":"")},{role:"user",content:user}]};
+ if(/gpt-oss/.test(cfg.rm))body.reasoning_effort="medium";const x=(await groqChat(body)).choices?.[0]?.message?.content||"";let j;
+ try{j=JSON.parse(x.slice(x.indexOf("{"),x.lastIndexOf("}")+1))}catch{throw new Error("Could not read the AI reply. Tap Generate again.")}return assemble(S,imp,j)}
+async function audit(rep,find){try{const b={model:cfg.rm,temperature:0,max_tokens:2500,messages:[{role:"system",content:"You check a radiology report for internal consistency. You get the REPORT and the radiologist's DICTATED FINDINGS. List, one per line starting with '- ', (a) every report line that contradicts another report line or a dictated finding, for example a normal statement about a structure or region that has a dictated abnormality, or 'no effusion' next to an effusion; (b) every dictated finding that is missing from the report or the impression. Quote the line. If there are no problems, answer exactly: OK"},{role:"user",content:"REPORT:\n"+rep+"\n\nDICTATED FINDINGS:\n"+find}]};if(/gpt-oss/.test(cfg.rm))b.reasoning_effort="low";return((await groqChat(b)).choices?.[0]?.message?.content||"").trim()}catch{return""}}
 function fillPadSel(){const s=$("#rfp"),v=s.value;s.innerHTML=pads.map((p,i)=>`<option value="${i}">From Pad ${i+1}</option>`).join("");if(v&&+v<pads.length)s.value=v}
 $("#rfl").onclick=()=>{const t=texts()[+$("#rfp").value];if(t==null)return;$("#rf").value=t;grow($("#rf"))};
 $("#rfc").onclick=async()=>{try{$("#rf").value=await navigator.clipboard.readText();grow($("#rf"))}catch{toast("Allow clipboard access, or paste into the box")}};
@@ -253,7 +272,10 @@ $("#rf").oninput=()=>grow($("#rf"));$("#rp").oninput=()=>grow($("#rp"));$("#rmic
 $("#rcl").onclick=()=>{$("#rf").value="";grow($("#rf"))};
 $("#rg").onclick=async()=>{const t=tpls.find(x=>x.id==$("#rt").value),f=$("#rf").value.trim();if(!t)return toast("Choose a template");if(!f)return toast("Add your findings first");if(!cfg.keys.length)return toast("Add a Groq API key in Settings first");
  const b=$("#rg");b.disabled=true;b.textContent="Generating…";
- try{const o=await report(t.text,f);$("#rp").value=o.r;grow($("#rp"));$("#rcv").textContent=o.c||"None";$("#ro").classList.remove("hide");$("#rch").open=!!o.c&&!/^none\W*$/i.test(o.c);$("#ro").scrollIntoView({behavior:"smooth"})}catch(e){toast(e.message||"Failed")}b.disabled=false;b.textContent="Generate report"};
+ try{const o=await report(t.text,f);$("#ro").classList.remove("hide");$("#rp").value=o.r;grow($("#rp"));$("#ro").scrollIntoView({behavior:"smooth"});
+  b.textContent="Double-checking…";const au=await audit(o.r,f),ok=/^OK\W*$/i.test(au);
+  $("#rcv").textContent=(au?(ok?"Second check: OK":"SECOND CHECK FOUND:\n"+au):"Second check unavailable")+"\n\n"+(o.c.length?o.c.join("\n"):"No template lines were changed.");$("#rch").open=!ok}
+ catch(e){toast(e.message||"Failed")}b.disabled=false;b.textContent="Generate report"};
 $("#rcp").onclick=()=>copy($("#rp").value);$("#rci").onclick=()=>{const x=$("#rp").value,k=x.toLowerCase().lastIndexOf("impression");copy(k<0?x:x.slice(k+10).replace(/^[\s:]+/,""))};
 $("#rsp").onclick=()=>{addP($("#rp").value);toast("Saved as a new pad")};
 let tpls=[],edId=null;const CO=["X-Ray","USG","Doppler","Obstetrics","CT","MRI","Other"],tcol=()=>col("templates");
